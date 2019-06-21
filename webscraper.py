@@ -1,13 +1,8 @@
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from bs4 import BeautifulSoup
+import requests
 
+url = 'http://ethans_fake_twitter_site.surge.sh/'
+response = requests.get(url, timeout=5) 
+content = BeautifulSoup(response.content, "html.parser")
 
-url = "/Users/leabroudo/Desktop/moviescraper/chromedriver"
-driver = webdriver.Chrome(url)
-
-driver.get("https://www.hulu.com/start/content?video_type=movie")
-page_movies = driver.find_elements_by_class_name("beaconid")
-
-
-for movie in page_movies: #must remove (year made) from some
-    print(movie.text)
+print (content)
