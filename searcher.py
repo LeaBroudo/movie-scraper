@@ -97,6 +97,7 @@ def search():
         if not found and target == movie["title"]:
             print(beautify(movie))
             found = True
+            continue
         
         movie_indiv = key_words(movie["title"])
         for key in target_indiv:
@@ -108,20 +109,20 @@ def search():
         print("\nSearching for movie availability on other services...")
         paid_search(target) 
         
-        if similar:
-            view = input("\nWould you like to view the availability of similar movies? (y/n) ")
-            if view != "y":
-                return 
+    if similar:
+        view = input("\nWould you like to view the availability of similar movies? (y/n) ")
+        if view != "y":
+            return 
             
-            ind = 0
-            while ind < len(similar):
-                print(beautify(similar[ind]))
+        ind = 0
+        while ind < len(similar):
+            print(beautify(similar[ind]))
                 
-                ind += 1
+            ind += 1
 
-                if ind % 5 == 0:
-                    more = input("View more similar movies? (y/n) ")
-                    if more == "n":
-                        return 
+            if ind % 5 == 0:
+                more = input("View more similar movies? (y/n) ")
+                if more == "n":
+                    return 
 
 search()
