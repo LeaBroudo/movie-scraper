@@ -24,10 +24,13 @@ def beautify(movie):
     return final
 
 def key_words(title):
-    keys = title.split()
-    for word in keys:
-        if word == "THE" or word == "AND" or len(word)<3:
-            keys.remove(word)
+    words = title.split()
+    keys = []
+
+    for word in words:
+        if word != "THE" and word != "AND" and len(word)>2:
+            keys.append(word)
+
     return keys
 
 def paid_search(title):
@@ -39,7 +42,7 @@ def paid_search(title):
     for word in title.split():
         name += word + "+"
 
-    driver.get("https://www.google.com/search?q="+name+"movie")
+    driver.get("https://www.google.com/search?q="+name+"movie+where+to+watch")
     
     try:
         incomplete = driver.find_element_by_class_name("dUFb4e")
@@ -47,22 +50,30 @@ def paid_search(title):
     except NoSuchElementException:
         pass
     
-    found_title = driver.find_element_by_xpath('//div[@class="SPZz6b"]/div[1]/span').text
-    
-    streamers = driver.find_elements_by_class_name("hl")
-    prices = driver.find_elements_by_xpath('//div[@class="ulLPN"]')
-    
-    if not streamers:
+    try:
+        found_title = driver.find_element_by_xpath('//div[@class="SPZz6b"]/div[1]/span').text
+    except NoSuchElementException:
+        print("There is no streaming availability of this movie.")
+        driver.quit()
+        return 
+
+    try: 
+        streamers = driver.find_elements_by_class_name("hl")
+        prices = driver.find_elements_by_xpath('//div[@class="ulLPN"]')
+    except NoSuchElementException:
+        pass
+    try:
         streamers = driver.find_elements_by_class_name("i3LlFf")
         prices = driver.find_elements_by_xpath('//div[@class="V8xno"]')
+    except NoSuchElementException:
+        print("There is no streaming availability of this movie.")
+        driver.quit()
+        return 
 
     if not streamers:
         print("There is no streaming availability of this movie.")
         driver.quit()
         return 
-
-
-    print(len(streamers),len(prices))
 
     catalog = {"title" : found_title}
     for i in range(len(streamers)):
@@ -88,25 +99,29 @@ def search():
             found = True
         
         movie_indiv = key_words(movie["title"])
-        count = 0
         for key in target_indiv:
             if key in movie_indiv:
-                count += 1
-            if count > 2:
                 similar.append(movie)
-                
 
     if not found:
         print("\nNo titles matched your search.")
         print("\nSearching for movie availability on other services...")
         paid_search(target) 
         
-        view = input("\nWould you like to view the availability of similar movies? (y/n) ")
-        if view == "y" and similar:
-            for movie in similar:
-                print(beautify(movie))
-        elif view == "y" and not similar:
-            print("\nSorry, no similar movies found.\n")
+        if similar:
+            view = input("\nWould you like to view the availability of similar movies? (y/n) ")
+            if view != "y":
+                return 
+            
+            ind = 0
+            while ind < len(similar):
+                print(beautify(similar[ind]))
+                
+                ind += 1
 
+                if ind % 5 == 0:
+                    more = input("View more similar movies? (y/n) ")
+                    if more == "n":
+                        return 
 
 search()
